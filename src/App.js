@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 // Importing the icons
 import searchIcon from './Assets/search.png';
@@ -15,19 +15,62 @@ function App() {
   const [location, setLocation] = useState("New York");
   const [searchItem, setSearchItem] = useState("");
   const [weatherIcon, setWeatherIcon] = useState(cloudIcon);
+  const [highTemperature, setHighTemperature] = useState("");
+  const [lowTemperature, setLowTemperature] = useState("");
+  const [precipitationChance, setPrecipitationChance] = useState("");
+  const [forecast, setForecast] = useState([]);
 
-  // Function to search and retrieve weather data
-  const search = async () => {
-    if (searchItem.trim() === "") {
-      return;
-    }
-
-    const url = `https://api.openweathermap.org/data/2.5/weather?q=${searchItem}&appid=${apiKey}&units=imperial`;
+  const fetchWeather = async (city) => {
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=imperial`;
+    const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}`;
     try {
       const response = await fetch(url);
       const data = await response.json();
+
+      const forecastResponse = await fetch(forecastUrl);
+      const forecastData = await forecastResponse.json();
+      const aggregateForecastData = (forecastData) => {
+        const dailyData = {};
+
+        forecastData.list.forEach((item) => {
+          const date = new Date(item.dt * 1000);
+          const day = date.toISOString().split('T')[0]; // Get the date in YYYY-MM-DD format
+
+          if (!dailyData[day]) {
+            dailyData[day] = {
+              high: item.main.temp_max,
+              low: item.main.temp_min,
+              date: day,
+            };
+          } else {
+            dailyData[day].high = Math.max(dailyData[day].high, item.main.temp_max);
+            dailyData[day].low = Math.min(dailyData[day].low, item.main.temp_min);
+          }
+        });
+
+        return Object.values(dailyData); // Convert the object to an array of its values
+      };
+
+      const aggregatedData = aggregateForecastData(forecastData);
+      setForecast(aggregatedData);
+
+
+      console.log(data);
+      console.log(forecastData);
+
+      if (data.cod === "404") {
+        alert("City not found. Please try again.");
+        return;
+      }
+
       setLocation(data.name);
       setTemperature(Math.floor(data.main.temp) + "°F");
+      setHighTemperature(Math.floor(data.main.temp_max) + "°F");
+      setLowTemperature(Math.floor(data.main.temp_min) + "°F");
+
+
+      const precipChance = forecastData.list[0].pop * 100;
+      setPrecipitationChance(`${precipChance}%`)
 
       const iconCode = data.weather[0].icon;
       const iconMap = {
@@ -57,20 +100,38 @@ function App() {
       };
       setWeatherIcon(iconMap[iconCode] || cloudIcon);
     } catch (error) {
-      console.error(error);
+      console.error("Failed to fetch weather data:", error);
     }
+  };
+
+  useEffect(() => {
+    fetchWeather("New York");
+  }, []);
+
+  const search = () => {
+    if (searchItem.trim() === "") return;
+    fetchWeather(searchItem);
   };
 
   return (
     <div className="App bg-background-blue min-h-screen flex flex-col items-center justify-start py-12">
-      <div className="relative w-full max-w-md">
+      <div className="w-full max-w-md flex justify-center items-center space-x-4">
         <input
-          className="w-full pl-4 pr-12 py-3 rounded-full border-none shadow-lg focus:ring focus:ring-blue-300"
+          className="pl-4 pr-12 py-3 w-full rounded-full border-none shadow-lg focus:ring focus:ring-blue-300"
           placeholder="Search..."
           value={searchItem}
           onChange={e => setSearchItem(e.target.value)}
+          onKeyDown={e => {
+            if (e.key === 'Enter') {
+              search();
+            }
+          }}
         />
-        <button onClick={search} className="absolute right-0 top-0 mt-3 mr-4">
+        <button
+          onClick={search}
+          className="bg-yellow-400 hover:bg-yellow-500 h-12 w-12 rounded-full flex justify-center items-center transition-colors duration-150 shadow-lg"
+          style={{ aspectRatio: '1 / 1' }}
+        >
           <img className="h-6 w-6" src={searchIcon} alt="Search" />
         </button>
       </div>
@@ -81,6 +142,15 @@ function App() {
 
       {/* Weather info container */}
       <div className="flex items-center justify-center w-full max-w-2xl px-4 py-1">
+        {/* High and Low Temperature Container */}
+        <div className="flex flex-col justify-center mr-4">
+          <p className="text-xl text-white font-medium mb-1">
+            H: {highTemperature}
+          </p>
+          <p className="text-xl text-white font-medium">
+            L: {lowTemperature}
+          </p>
+        </div>
 
         {/* Text container for city name and temperature */}
         <div className="flex flex-col items-center justify-center mr-2">
@@ -101,6 +171,23 @@ function App() {
         <img className="h-24 w-24 self-end mb-2" src={weatherIcon} alt="Weather" />
       </div>
 
+      {/* Precipitation chance */}
+      {precipitationChance && precipitationChance !== "0%" && (
+        <p className="text-xl text-white font-medium mt-2">
+          Precipitation chance: {precipitationChance}
+        </p>
+      )}
+
+      <div className="forecast-container w-full max-w-md mx-auto bg-[#0d2a32] py-2 rounded-lg shadow-lg mt-8">
+        {forecast.map((day, index) => (
+          <div key={index} className="flex justify-between items-center text-white py-4 px-4">
+            <span>
+              {new Date(day.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
+            </span>
+            <span>{Math.round(day.low)}°F - {Math.round(day.high)}°F</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
