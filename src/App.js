@@ -22,7 +22,7 @@ function App() {
 
   const fetchWeather = async (city) => {
     const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=imperial`;
-    const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}`;
+    const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&units=imperial`;
     try {
       const response = await fetch(url);
       const data = await response.json();
@@ -31,25 +31,43 @@ function App() {
       const forecastData = await forecastResponse.json();
       const aggregateForecastData = (forecastData) => {
         const dailyData = {};
+        // Use UTC date for today to align with API data
+        const today = new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), new Date().getUTCDate()));
+        console.log("Today's date in UTC for comparison:", today.toISOString());
 
         forecastData.list.forEach((item) => {
+          // Convert item date to UTC
           const date = new Date(item.dt * 1000);
-          const day = date.toISOString().split('T')[0]; // Get the date in YYYY-MM-DD format
+          const utcDate = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+          const day = utcDate.toISOString().split('T')[0]; // Get the date in YYYY-MM-DD format
 
-          if (!dailyData[day]) {
-            dailyData[day] = {
-              high: item.main.temp_max,
-              low: item.main.temp_min,
-              date: day,
-            };
+          console.log(`Processing forecast item for UTC date: ${day}, Actual timestamp: ${item.dt}`);
+
+          // Compare using UTC dates
+          if (utcDate > today) {
+            if (!dailyData[day]) {
+              dailyData[day] = {
+                high: item.main.temp_max,
+                low: item.main.temp_min,
+                date: day,
+              };
+              console.log(`Added new forecast for ${day}: High - ${dailyData[day].high}, Low - ${dailyData[day].low}`);
+            } else {
+              dailyData[day].high = Math.max(dailyData[day].high, item.main.temp_max);
+              dailyData[day].low = Math.min(dailyData[day].low, item.main.temp_min);
+              console.log(`Updated forecast for ${day}: High - ${dailyData[day].high}, Low - ${dailyData[day].low}`);
+            }
           } else {
-            dailyData[day].high = Math.max(dailyData[day].high, item.main.temp_max);
-            dailyData[day].low = Math.min(dailyData[day].low, item.main.temp_min);
+            console.log(`Skipping forecast for ${day} as it is for today or earlier.`);
           }
         });
 
-        return Object.values(dailyData); // Convert the object to an array of its values
+        console.log("Aggregated daily data in UTC:", dailyData);
+        return Object.values(dailyData); // Convert to an array
       };
+
+
+
 
       const aggregatedData = aggregateForecastData(forecastData);
       setForecast(aggregatedData);
@@ -182,12 +200,17 @@ function App() {
         {forecast.map((day, index) => (
           <div key={index} className="flex justify-between items-center text-white py-4 px-4">
             <span>
-              {new Date(day.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
+              {new Date(day.date).toLocaleDateString('en-US', {
+                month: 'long',
+                day: 'numeric',
+                timeZone: 'UTC' // Specify UTC time zone for display
+              })}
             </span>
             <span>{Math.round(day.low)}°F - {Math.round(day.high)}°F</span>
           </div>
         ))}
       </div>
+
     </div>
   );
 }
