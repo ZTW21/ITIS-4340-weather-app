@@ -9,8 +9,7 @@ import rainIcon from './Assets/rain.png';
 import snowIcon from './Assets/snow.png';
 
 function App() {
-  // b3dbc0b5d0646a9e299bb42b3551ecb4 -- use this key for the weather API when it activates
-  const apiKey = "56cd94bbcb55eba35a4bbd7126df5058";
+  const apiKey = process.env.REACT_APP_API_KEY;
   const [temperature, setTemperature] = useState("50 °F");
   const [location, setLocation] = useState("New York");
   const [searchItem, setSearchItem] = useState("");
@@ -203,7 +202,7 @@ function App() {
               {new Date(day.date).toLocaleDateString('en-US', {
                 month: 'long',
                 day: 'numeric',
-                timeZone: 'UTC' // Specify UTC time zone for display
+                timeZone: 'UTC'
               })}
             </span>
             <span>{Math.round(day.low)}°F - {Math.round(day.high)}°F</span>
