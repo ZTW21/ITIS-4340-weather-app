@@ -18,6 +18,7 @@ function App() {
   const [lowTemperature, setLowTemperature] = useState("");
   const [precipitationChance, setPrecipitationChance] = useState("");
   const [forecast, setForecast] = useState([]);
+  const [unit, setUnit] = useState("F");
 
   const fetchWeather = async (city) => {
     const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=imperial`;
@@ -125,6 +126,12 @@ function App() {
     fetchWeather(searchItem);
   };
 
+  const convertTemperature = (temp, toUnit) => {
+    return toUnit === "C"
+    ? ((temp - 32) * 5) / 9
+    : (temp * 9) / 5 + 32;
+  }
+
   return (
     <div className="App bg-background-blue min-h-screen flex flex-col items-center justify-start py-12">
       <div className="w-full max-w-md flex justify-center items-center space-x-4">
@@ -147,6 +154,8 @@ function App() {
           <img className="h-6 w-6" src={searchIcon} alt="Search" />
         </button>
       </div>
+
+      
 
       <p className='text-xl text-white font-medium mb-2 pt-2'>
         Today
@@ -174,7 +183,7 @@ function App() {
 
           {/* Temperature */}
           <p className="text-5xl text-white font-light">
-            {temperature}
+            {unit === "F" ? temperature : Math.round(convertTemperature(parseInt(temperature), "C")) + "°C"}
           </p>
 
         </div>
@@ -191,6 +200,16 @@ function App() {
       )}
 
       <div className="forecast-container w-full max-w-md mx-auto bg-[#0d2a32] py-2 rounded-lg shadow-lg mt-8">
+      <div className="switch-container">
+        <label className="text-white">
+          <input 
+          type="checkbox"
+          checked={unit === "C"}
+          onChange={() => setUnit(unit === "F" ? "C" : "F")}
+          />
+          {unit === "F" ? "Switch to C" : "Switch to°F"}
+          </label>
+      </div>
         {forecast.map((day, index) => (
           <div key={index} className="flex justify-between items-center text-white py-4 px-4">
             <span>
@@ -200,7 +219,10 @@ function App() {
                 timeZone: 'UTC'
               })}
             </span>
-            <span>{Math.round(day.low)}°F - {Math.round(day.high)}°F</span>
+            <span>{unit === "F"
+              ? Math.round(day.low) + "°F - " + Math.round(day.high) + "°F"
+              : Math.round(convertTemperature(day.low, "C")) + "°C - " + Math.round(convertTemperature(day.high, "C")) + "°C"}
+            </span>
           </div>
         ))}
       </div>
