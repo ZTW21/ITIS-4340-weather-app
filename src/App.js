@@ -50,18 +50,13 @@ function App() {
                 low: item.main.temp_min,
                 date: day,
               };
-              console.log(`Added new forecast for ${day}: High - ${dailyData[day].high}, Low - ${dailyData[day].low}`);
+           
             } else {
               dailyData[day].high = Math.max(dailyData[day].high, item.main.temp_max);
               dailyData[day].low = Math.min(dailyData[day].low, item.main.temp_min);
-              console.log(`Updated forecast for ${day}: High - ${dailyData[day].high}, Low - ${dailyData[day].low}`);
             }
-          } else {
-            console.log(`Skipping forecast for ${day} as it is for today or earlier.`);
           }
         });
-
-        console.log("Aggregated daily data in UTC:", dailyData);
         return Object.values(dailyData); // Convert to an array
       };
 
