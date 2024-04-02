@@ -51,7 +51,7 @@ function App() {
                 low: item.main.temp_min,
                 date: day,
               };
-           
+
             } else {
               dailyData[day].high = Math.max(dailyData[day].high, item.main.temp_max);
               dailyData[day].low = Math.min(dailyData[day].low, item.main.temp_min);
@@ -128,8 +128,8 @@ function App() {
 
   const convertTemperature = (temp, toUnit) => {
     return toUnit === "C"
-    ? ((temp - 32) * 5) / 9
-    : (temp * 9) / 5 + 32;
+      ? ((temp - 32) * 5) / 9
+      : (temp * 9) / 5 + 32;
   }
 
   return (
@@ -155,7 +155,7 @@ function App() {
         </button>
       </div>
 
-      
+
 
       <p className='text-xl text-white font-medium mb-2 pt-2'>
         Today
@@ -200,16 +200,25 @@ function App() {
       )}
 
       <div className="forecast-container w-full max-w-md mx-auto bg-[#0d2a32] py-2 rounded-lg shadow-lg mt-8">
-      <div className="switch-container">
+        {/* <div className="switch-container">
         <label className="text-white">
           <input 
           type="checkbox"
           checked={unit === "C"}
           onChange={() => setUnit(unit === "F" ? "C" : "F")}
           />
-          {unit === "F" ? "Switch to C" : "Switch to°F"}
+          {unit === "F" ? "Switch to °C" : "Switch to °F"}
           </label>
-      </div>
+      </div> */}
+        <div className="flex items-center justify-end mt-2 mr-4">
+          <label htmlFor="toggle" className="inline-flex relative items-center cursor-pointer">
+            <input type="checkbox" value="" id="toggle" className="sr-only peer" checked={unit === "C"} onChange={() => setUnit(unit === "F" ? "C" : "F")} />
+            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-checked:bg-blue-600"></div>
+            <span className="ml-3 text-sm font-medium text-white">
+              {unit === "F" ? "°F" : "°C"}
+            </span>
+          </label>
+        </div>
         {forecast.map((day, index) => (
           <div key={index} className="flex justify-between items-center text-white py-4 px-4">
             <span>
@@ -220,9 +229,9 @@ function App() {
               })}
             </span>
             <span>
-              {unit === "F" 
-              ? Math.round(day.low) + "°F - " + Math.round(day.high) + "°F"
-              : Math.round(convertTemperature(day.low, "C")) + "°C - " + Math.round(convertTemperature(day.high, "C")) + "°C"}
+              {unit === "F"
+                ? Math.round(day.low) + "°F - " + Math.round(day.high) + "°F"
+                : Math.round(convertTemperature(day.low, "C")) + "°C - " + Math.round(convertTemperature(day.high, "C")) + "°C"}
             </span>
           </div>
         ))}
