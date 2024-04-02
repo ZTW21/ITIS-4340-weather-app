@@ -27,6 +27,11 @@ function App() {
       const response = await fetch(url);
       const data = await response.json();
 
+      if (data.cod === "404") {
+        alert("City not found. Please try again.");
+        return; // Early return to stop further execution
+      }
+
       const forecastResponse = await fetch(forecastUrl);
       const forecastData = await forecastResponse.json();
       const aggregateForecastData = (forecastData) => {
@@ -200,16 +205,6 @@ function App() {
       )}
 
       <div className="forecast-container w-full max-w-md mx-auto bg-[#0d2a32] py-2 rounded-lg shadow-lg mt-8">
-        {/* <div className="switch-container">
-        <label className="text-white">
-          <input 
-          type="checkbox"
-          checked={unit === "C"}
-          onChange={() => setUnit(unit === "F" ? "C" : "F")}
-          />
-          {unit === "F" ? "Switch to °C" : "Switch to °F"}
-          </label>
-      </div> */}
         <div className="flex items-center justify-end mt-2 mr-4">
           <label htmlFor="toggle" className="inline-flex relative items-center cursor-pointer">
             <input type="checkbox" value="" id="toggle" className="sr-only peer" checked={unit === "C"} onChange={() => setUnit(unit === "F" ? "C" : "F")} />
