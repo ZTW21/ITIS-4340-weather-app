@@ -220,10 +220,9 @@ function App() {
               })}
             </span>
             <span>
-              {/* {unit === "F" 
+              {unit === "F" 
               ? Math.round(day.low) + "°F - " + Math.round(day.high) + "°F"
-              : Math.round(convertTemperature(day.low, "C")) + "°C - " + Math.round(convertTemperature(day.high, "C")) + "°C"} */}
-              {Math.round(day.low)}°F - {Math.round(day.high)}°F
+              : Math.round(convertTemperature(day.low, "C")) + "°C - " + Math.round(convertTemperature(day.high, "C")) + "°C"}
             </span>
           </div>
         ))}
