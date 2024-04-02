@@ -166,10 +166,10 @@ function App() {
         {/* High and Low Temperature Container */}
         <div className="flex flex-col justify-center mr-4">
           <p className="text-xl text-white font-medium mb-1">
-            H: {highTemperature}
+            H: {unit === "F" ? highTemperature : Math.round(convertTemperature(parseInt(highTemperature), "C")) + "°C"}
           </p>
           <p className="text-xl text-white font-medium">
-            L: {lowTemperature}
+            L: {unit === "F" ? lowTemperature : Math.round(convertTemperature(parseInt(lowTemperature), "C")) + "°C"}
           </p>
         </div>
 
@@ -219,9 +219,11 @@ function App() {
                 timeZone: 'UTC'
               })}
             </span>
-            <span>{unit === "F" 
+            <span>
+              {/* {unit === "F" 
               ? Math.round(day.low) + "°F - " + Math.round(day.high) + "°F"
-              : Math.round(convertTemperature(day.low, "C")) + "°C - " + Math.round(convertTemperature(day.high, "C")) + "°C"}
+              : Math.round(convertTemperature(day.low, "C")) + "°C - " + Math.round(convertTemperature(day.high, "C")) + "°C"} */}
+              {Math.round(day.low)}°F - {Math.round(day.high)}°F
             </span>
           </div>
         ))}
