@@ -219,7 +219,7 @@ function App() {
                 timeZone: 'UTC'
               })}
             </span>
-            <span>{unit === "F"
+            <span>{unit === "F" 
               ? Math.round(day.low) + "°F - " + Math.round(day.high) + "°F"
               : Math.round(convertTemperature(day.low, "C")) + "°C - " + Math.round(convertTemperature(day.high, "C")) + "°C"}
             </span>
